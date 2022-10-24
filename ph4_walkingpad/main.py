@@ -77,8 +77,8 @@ class WalkingPadControl(Ph4Cmd):
 
         await self.ctler.ask_profile()
         await asyncio.sleep(1.5)
-        await self.ask_beep()
-        await asyncio.sleep(1.0)
+        # await self.ask_beep()
+        # await asyncio.sleep(1.0)
 
     async def work(self):
         self.worker_loop = asyncio.new_event_loop()
@@ -89,6 +89,9 @@ class WalkingPadControl(Ph4Cmd):
         self.worker_thread.start()
 
         address = await self.scan_address()
+        if not address:
+            raise Exception("Address not found")
+        print('address: ', address)
         if self.args.scan:
             return
 
@@ -185,6 +188,23 @@ class WalkingPadControl(Ph4Cmd):
         # if self.args.no_bt:
         #     self.cmdloop()
         # else:
+        try:
+            while True:
+                if self.args.perform_stop:
+                    self.do_stop(None)
+                    await asyncio.sleep(3)
+                    raise Exception('performed_stop')
+
+                self.do_start(None)
+                sleep_time = 5.8 * 60
+                print(f'sleeping for {sleep_time}s')
+                await asyncio.sleep(sleep_time)
+                self.do_stop(None)
+                await asyncio.sleep(3)
+        except KeyboardInterrupt as e:
+            self.do_stop(None)
+            await asyncio.sleep(1.0)
+            raise e
         await self.acmdloop()
 
     def on_status(self, sender, status: WalkingPadCurStatus):
@@ -403,8 +423,9 @@ class WalkingPadControl(Ph4Cmd):
                             help='Walking pad address (if none, scanner is used). OSX 12 have to scan first, do not use')
         parser.add_argument('--filter', dest='address_filter',
                             help='Walking pad address filter, if scanning and multiple devices are found')
-        parser.add_argument('--scan-timeout', dest='scan_timeout', type=float, default=3.0,
+        parser.add_argument('--scan-timeout', dest='scan_timeout', type=float, default=10.0,
                             help='Scan timeout in seconds, double')
+        parser.add_argument('--stop', dest='perform_stop', type=bool, default=False, help='Stop the track');
         return parser
 
     async def stop_belt(self, to_standby=False):
@@ -435,7 +456,7 @@ class WalkingPadControl(Ph4Cmd):
 
     async def ask_beep(self):
         self.asked_status_beep = True
-        await self.ctler.cmd_162_3_7()
+        # await self.ctler.cmd_162_3_7()
 
     async def ask_status(self):
         self.asked_status = True
