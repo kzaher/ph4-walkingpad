@@ -1,5 +1,5 @@
 . venv/bin/activate
-export ADDRESS=0D2C9F24-F57B-7658-5A97-C25BCAA50148
+export ADDRESS=8ECF901E-82B2-826D-FC47-E44DC7D8CBC0
 
 exitfn () {
     trap SIGINT              # Restore signal handling for SIGINT
