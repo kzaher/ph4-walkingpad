@@ -185,9 +185,7 @@ class WalkingPadControl(Ph4Cmd):
                 + "-" * self.get_term_width()
         )
 
-        # if self.args.no_bt:
-        #     self.cmdloop()
-        # else:
+        import Quartz
         try:
             while True:
                 if self.args.perform_stop:
@@ -198,8 +196,13 @@ class WalkingPadControl(Ph4Cmd):
                 self.do_start(None)
                 sleep_time = 5.8 * 60
                 print(f'sleeping for {sleep_time}s')
-                await asyncio.sleep(sleep_time)
+                for i in range(int(sleep_time)):
+                    await asyncio.sleep(1.0)
+                    if 'CGSSessionScreenIsLocked' in Quartz.CGSessionCopyCurrentDictionary():
+                        break
                 self.do_stop(None)
+                while 'CGSSessionScreenIsLocked' in Quartz.CGSessionCopyCurrentDictionary():
+                    await asyncio.sleep(1.0)
                 await asyncio.sleep(3)
         except KeyboardInterrupt as e:
             self.do_stop(None)
@@ -423,7 +426,7 @@ class WalkingPadControl(Ph4Cmd):
                             help='Walking pad address (if none, scanner is used). OSX 12 have to scan first, do not use')
         parser.add_argument('--filter', dest='address_filter',
                             help='Walking pad address filter, if scanning and multiple devices are found')
-        parser.add_argument('--scan-timeout', dest='scan_timeout', type=float, default=10.0,
+        parser.add_argument('--scan-timeout', dest='scan_timeout', type=float, default=20.0,
                             help='Scan timeout in seconds, double')
         parser.add_argument('--stop', dest='perform_stop', type=bool, default=False, help='Stop the track');
         return parser
