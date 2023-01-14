@@ -185,9 +185,17 @@ class WalkingPadControl(Ph4Cmd):
                 + "-" * self.get_term_width()
         )
 
-        # if self.args.no_bt:
-        #     self.cmdloop()
-        # else:
+        is_windows = sys.platform == 'win64'
+        if is_windows:
+          import ctypes
+          user32 = ctypes.windll.User32
+        else:
+          import Quartz
+
+        def isScreenLocked():
+            if is_windows: return user32.GetForegroundWindow() == 0
+            else: return 'CGSSessionScreenIsLocked' in Quartz.CGSessionCopyCurrentDictionary()
+
         try:
             while True:
                 if self.args.perform_stop:
@@ -200,7 +208,11 @@ class WalkingPadControl(Ph4Cmd):
                 print(f'sleeping for {sleep_time}s')
                 for i in range(int(sleep_time)):
                     await asyncio.sleep(1.0)
+                    if isScreenLocked():
+                        break
                 self.do_stop(None)
+                while isScreenLocked():
+                    await asyncio.sleep(1.0)
                 await asyncio.sleep(3)
         except KeyboardInterrupt as e:
             self.do_stop(None)
@@ -424,7 +436,7 @@ class WalkingPadControl(Ph4Cmd):
                             help='Walking pad address (if none, scanner is used). OSX 12 have to scan first, do not use')
         parser.add_argument('--filter', dest='address_filter',
                             help='Walking pad address filter, if scanning and multiple devices are found')
-        parser.add_argument('--scan-timeout', dest='scan_timeout', type=float, default=10.0,
+        parser.add_argument('--scan-timeout', dest='scan_timeout', type=float, default=20.0,
                             help='Scan timeout in seconds, double')
         parser.add_argument('--stop', dest='perform_stop', type=bool, default=False, help='Stop the track');
         return parser
