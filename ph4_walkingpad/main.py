@@ -198,7 +198,8 @@ class WalkingPadControl(Ph4Cmd):
                 self.do_start(None)
                 sleep_time = 5.8 * 60
                 print(f'sleeping for {sleep_time}s')
-                await asyncio.sleep(sleep_time)
+                for i in range(int(sleep_time)):
+                    await asyncio.sleep(1.0)
                 self.do_stop(None)
                 await asyncio.sleep(3)
         except KeyboardInterrupt as e:

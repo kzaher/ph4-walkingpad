@@ -80,7 +80,7 @@ class Scanner:
             self.devices_dict[dev[i].address].append(dev[i].metadata["uuids"])
             self.devices_list.append(dev[i].address)
 
-            if dev_name and dev_name in dev[i].name.lower():
+            if dev_name and dev[i].name and dev_name in dev[i].name.lower():
                 self.walking_belt_candidates.append(dev[i])
 
             elif matcher and matcher(dev[i].name):
