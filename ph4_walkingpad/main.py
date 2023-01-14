@@ -185,7 +185,8 @@ class WalkingPadControl(Ph4Cmd):
                 + "-" * self.get_term_width()
         )
 
-        is_windows = sys.platform == 'win64'
+        import sys
+        is_windows = sys.platform.startswith('win')
         if is_windows:
           import ctypes
           user32 = ctypes.windll.User32
