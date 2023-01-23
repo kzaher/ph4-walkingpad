@@ -192,10 +192,17 @@ class WalkingPadControl(Ph4Cmd):
           user32 = ctypes.windll.User32
         else:
           import Quartz
+        
+        def is_at_desk():
+            try: return Quartz.CGDisplayBounds(Quartz.CGMainDisplayID()).size.width == 2560.0
+            except: return true
 
-        def isScreenLocked():
+        def is_screen_locked():
             if is_windows: return user32.GetForegroundWindow() == 0
             else: return 'CGSSessionScreenIsLocked' in Quartz.CGSessionCopyCurrentDictionary()
+
+        def should_run():
+            return is_at_desk() and not is_screen_locked()
 
         try:
             while True:
@@ -209,10 +216,10 @@ class WalkingPadControl(Ph4Cmd):
                 print(f'sleeping for {sleep_time}s')
                 for i in range(int(sleep_time)):
                     await asyncio.sleep(1.0)
-                    if isScreenLocked():
+                    if not should_run():
                         break
                 self.do_stop(None)
-                while isScreenLocked():
+                while not should_run():
                     await asyncio.sleep(1.0)
                 await asyncio.sleep(3)
         except KeyboardInterrupt as e:
