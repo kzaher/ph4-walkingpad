@@ -195,7 +195,7 @@ class WalkingPadControl(Ph4Cmd):
         
         def is_at_desk():
             try: return Quartz.CGDisplayBounds(Quartz.CGMainDisplayID()).size.width == 2560.0
-            except: return true
+            except: return True
 
         def is_screen_locked():
             if is_windows: return user32.GetForegroundWindow() == 0
@@ -459,6 +459,8 @@ class WalkingPadControl(Ph4Cmd):
         if manual:
             await self.ctler.switch_mode(WalkingPad.MODE_MANUAL)
             await asyncio.sleep(1.5)
+            # await self.ctler.set_pref_start_speed(0)
+            # await asyncio.sleep(1.5)
             await self.ctler.start_belt()
         else:
             await self.ctler.switch_mode(WalkingPad.MODE_AUTOMAT)
