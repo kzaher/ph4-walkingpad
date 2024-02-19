@@ -145,6 +145,7 @@ class WalkingPadControl(Ph4Cmd):
 
                 if self.args.address_filter:
                     candidates = [x for x in candidates if str(x.address).startswith(self.args.address_filter)]
+                logger.info("WalkingPad candidates after filter: %s" % (candidates,))
                 return candidates[0] if candidates else None
         return None
 
